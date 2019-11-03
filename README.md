@@ -3,6 +3,7 @@
 ## Install necessary modules
 
 ### Install nodejs
+https://nodejs.org/en/download/
 
 ### Install npm
 ... 
@@ -13,8 +14,7 @@ npm install --save request request-promise cheerio puppeteer
 ## Next steps
 1. open a console
 2. Navigate to twitterparser
-3. Delete file output.json, if present
-4. node parser.js
+3. node parser.js
 
 ## Other helpful stuff
 
