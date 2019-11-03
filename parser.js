@@ -10,10 +10,26 @@ const picTwitterRegex = /pic.twitter.com\/\S+/gi
 
 let allTwitts = {}
 
+
+// Utilities
 const init = () => {
     var fs = require('fs')
     fs.writeFile(outputFilePath, '', function(){console.log('done')})
 }
+const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
+
+const scrapAndSleep = async callback => {
+    await sleep(2000)
+    await callback()
+}
+
+const keepOpen = async callback => {
+    while (true) {
+        await scrapAndSleep(callback)
+    }
+}
+
+
 const saveToFile = (data, filePath = './markus.html') => {
     const fs = require('fs')
     fs.appendFile(filePath, data, function(err) {
@@ -21,19 +37,6 @@ const saveToFile = (data, filePath = './markus.html') => {
             return console.log(err)
         }
     })
-}
-
-const getTwitts = () => {
-    urls.map(url => rp(url)
-    .then(function(html){
-      //success!
-      parseContent(html)
-      
-    })
-    .catch(function(err){
-      //handle error
-    })
-    )
 }
 
 const readFile = () => {
@@ -48,6 +51,20 @@ const readFile = () => {
             console.log(err)
         }
     })
+}
+
+// Functionality 
+
+const getTwitts = () => {
+    urls.map(url => rp(url)
+        .then(function(html){
+            console.log('Requested new url ... ')
+            parseContent(html)
+        })
+        .catch(function(err){
+        //handle error
+        })
+    )
 }
 
 parseItem = item => {
@@ -85,7 +102,7 @@ const parseContent = data => {
 
    items.each((index, item) => {
     const twittId = item.attribs['data-item-id']
-    console.log('\n\n\nnew twitt', twittId)
+    // console.log('\n\n\nnew twitt', twittId)
 
     if ( !allTwitts[twittId] ) {
         allTwitts[twittId] = parseItem(items[index])
@@ -97,7 +114,13 @@ const parseContent = data => {
 // Prepare environment
 init()
 
-// Execute
-readFile()
-// 
+// Uncomment this to run the offline version -> read from local file
+// readFile()
+
+// Uncomment this to run the script online but only once (and only get 20 twitts)
+// getTwitts()
+
+// Uncomment this to run the script on repeat. 
+// You can stop the process in console by Ctrl + C
+keepOpen(getTwitts)
 
