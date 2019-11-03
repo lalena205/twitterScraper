@@ -1,7 +1,9 @@
 const rp = require('request-promise')
 const $ = require('cheerio')
 
-const urls = ['https://twitter.com/_markusbraun']
+const urls = [
+    'https://twitter.com/_markusbraun'
+]
 const outputFilePath = './output.json'
 const urlRegex = /(http|ftp|https):\/\/\S+/gi
 
@@ -14,13 +16,13 @@ let allTwitts = {}
 // Utilities
 const init = () => {
     var fs = require('fs')
-    fs.writeFile(outputFilePath, '', function(){console.log('done')})
+    fs.writeFile(outputFilePath, '', function(){console.log('init done')})
 }
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
 
 const scrapAndSleep = async callback => {
-    await sleep(2000)
     await callback()
+    await sleep(5 * 60 * 1000)
 }
 
 const keepOpen = async callback => {
@@ -53,7 +55,7 @@ const readFile = () => {
     })
 }
 
-// Functionality 
+// Logic 
 
 const getTwitts = () => {
     urls.map(url => rp(url)
@@ -72,7 +74,7 @@ parseItem = item => {
 
     const linkInText = newTwitt.match(urlRegex)
     linkInText && (newTwitt = newTwitt.replace(linkInText, ''))
-
+    
     const twittPic = newTwitt.match(picTwitterRegex)
     twittPic && (newTwitt = newTwitt.replace(twittPic, ''))
 
@@ -83,7 +85,7 @@ parseItem = item => {
     console.log(newTwitt,
         '\n link in text is ', linkInText, 
         '\n twitt pic is ', twittPic, 
-        '\n link is ', ahref.href, 
+        // '\n link is ', ahref, 
         // '\n pic is ', pic, '\n'
     )
 
@@ -97,9 +99,6 @@ parseItem = item => {
 const parseContent = data => {
     const items = $('#timeline li.stream-item .js-stream-tweet', data);
 
-   let txt = $('.TweetTextSize', items[1]).html()
-//    console.log(txt)
-
    items.each((index, item) => {
     const twittId = item.attribs['data-item-id']
     // console.log('\n\n\nnew twitt', twittId)
@@ -107,6 +106,7 @@ const parseContent = data => {
     if ( !allTwitts[twittId] ) {
         allTwitts[twittId] = parseItem(items[index])
         saveToFile(`${JSON.stringify(allTwitts[twittId], null, 2)}\n`, outputFilePath)
+        console.log('\nnew tweet \n', allTwitts[twittId], '\n')
     }
    })
 }
